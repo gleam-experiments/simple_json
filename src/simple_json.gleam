@@ -1,21 +1,21 @@
 import gleam/list
 import gleam/int as int_mod
 import gleam/float as float_mod
-import gleam/option.{Option, None, Some}
-import gleam/iodata.{Iodata}
+import gleam/option.{None, Option, Some}
+import gleam/string_builder.{StringBuilder}
 
 pub external type Builder
 
 external fn erase(a) -> Builder =
   "gleam@dynamic" "unsafe_coerce"
 
-pub external fn to_iodata(Builder) -> Iodata =
+pub external fn to_builder(Builder) -> StringBuilder =
   "gleam@dynamic" "unsafe_coerce"
 
 pub fn to_string(builder: Builder) -> String {
   builder
-  |> to_iodata
-  |> iodata.to_string
+  |> to_builder
+  |> string_builder.to_string
 }
 
 pub fn int(i: Int) -> Builder {
@@ -34,9 +34,9 @@ pub fn array(f: List(Builder)) -> Builder {
   f
   |> list.intersperse(erase(","))
   |> erase
-  |> to_iodata
-  |> iodata.append("]")
-  |> iodata.prepend("[")
+  |> to_builder
+  |> string_builder.append("]")
+  |> string_builder.prepend("[")
   |> erase
 }
 
@@ -63,9 +63,9 @@ pub fn nullable(n: Option(Builder)) -> Builder {
 // TODO: escape
 pub fn string(s: String) -> Builder {
   s
-  |> iodata.new
-  |> iodata.append("\"")
-  |> iodata.prepend("\"")
+  |> string_builder.from_string
+  |> string_builder.append("\"")
+  |> string_builder.prepend("\"")
   |> erase
 }
 
@@ -76,15 +76,15 @@ pub fn object(fields: List(tuple(String, Builder))) -> Builder {
       let tuple(key, value) = tup
       key
       |> string
-      |> to_iodata
-      |> iodata.append(":")
-      |> iodata.append_iodata(to_iodata(value))
+      |> to_builder
+      |> string_builder.append(":")
+      |> string_builder.append_builder(to_builder(value))
     },
   )
   // TODO: use fold rather than map + intersperse
-  |> list.intersperse(iodata.new(","))
-  |> iodata.concat
-  |> iodata.prepend("{")
-  |> iodata.append("}")
+  |> list.intersperse(string_builder.from_string(","))
+  |> string_builder.concat
+  |> string_builder.prepend("{")
+  |> string_builder.append("}")
   |> erase
 }
