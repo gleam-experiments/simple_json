@@ -1,5 +1,7 @@
-import simple_json.{object, int, float, string, array, null, nullable, true, false}
-import gleam/option.{Some, None}
+import simple_json.{
+  array, false, float, int, null, nullable, object, string, true
+}
+import gleam/option.{None, Some}
 import gleam/should
 
 pub fn encoding_test() {
